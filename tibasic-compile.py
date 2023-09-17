@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# pylint: disable=missing-module-docstring, missing-function-docstring, invalid-name, unspecified-encoding, line-too-long
+# pylint: disable=missing-module-docstring, missing-function-docstring, unspecified-encoding
 
 import argparse
 import subprocess
@@ -63,7 +63,8 @@ def infile(file_path: str):
 
 def outfile(file_path: str):
     try:
-        # TODO add some minimal arg validation just to make sure the path is possibly valid, TIProgram.save() handles the file opening, writing, and closing
+        # TODO: add some minimal arg validation just to make sure the path is possibly valid
+        #       since TIProgram.save() handles the file opening, writing, and closing
         # file = open(file_path, 'a')
         # file.close()
         return file_path
@@ -91,17 +92,17 @@ def ti_program_name(string: str):
 
 # text -> 8xp program
 def build(input_file_contents, output_file_path, program_name):
-    logger.info("Compiling program: %s", program_name)
+    logger.info("Compiling program: {}", program_name)
 
     program = TIProgram(name=program_name)
     program.load_string(input_file_contents)
     program.save(output_file_path)
 
-    logger.info("Program written at %s", output_file_path)
+    logger.info("Program written at {}", output_file_path)
 
 
 def upload(output_file_path):
-    logger.info("Uploading %s", output_file_path)
+    logger.info("Uploading {}", output_file_path)
 
     # Use `tilp` to upload program to calculator
     model = "ti84+ce"
@@ -125,14 +126,14 @@ def upload(output_file_path):
 
     # Handle errors
     if tilp_stderr != "":
-        logger.critical("Failed to upload file: %s", tilp_stderr)
+        logger.critical("Failed to upload file: {}", tilp_stderr)
         sys.exit(1)
     elif "placeholder that will never match" in tilp_stdout:
         # TODO: figure out what error messages can be present and check if stdout contains them
-        logger.critical("Failed to upload file: %s", "I have no clue what happened tbh")
+        logger.critical("Failed to upload file: {}", "I have no clue what happened tbh")
         sys.exit(1)
     elif proc.returncode != 0:
-        logger.critical("'%s' exited with exit status %d", " ".join(proc.args), proc.returncode)
+        logger.critical("'{}' exited with exit status {}", " ".join(proc.args), proc.returncode)
         sys.exit(1)
     else:
         logger.info("Upload completed")
@@ -141,9 +142,9 @@ def upload(output_file_path):
 if __name__ == "__main__":
     # Set up logging
     logger = logging.getLogger("tibasic_compiler")
-    # format_str = "%(name)s (%(levelname)s): %(message)s"
-    format_str = "%(levelname)s: %(message)s"
-    logging.basicConfig(format=format_str)
+    # FORMAT_STR = "%(name)s (%(levelname)s): %(message)s"
+    FORMAT_STR = "%(levelname)s: %(message)s"
+    logging.basicConfig(format=FORMAT_STR)
 
     args = parse_args()
 
