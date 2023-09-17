@@ -1,4 +1,10 @@
 [MAIN]
+# Make pylint work with venvs
+init-hook=
+    try: import pylint_venv
+    except ImportError: pass
+    else: pylint_venv.inithook()
+
 # Files or directories to be skipped. They should be base names, not paths.
 ignore=.git
 
