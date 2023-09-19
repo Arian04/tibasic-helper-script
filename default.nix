@@ -7,6 +7,7 @@ in {
     inputsFrom = [ build ];
     packages = with pkgs.python311Packages; [
       black
+      virtualenvwrapper
     ];
   };
 }
