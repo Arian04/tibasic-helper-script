@@ -31,11 +31,10 @@ python311Packages.buildPythonPackage rec {
   propagatedBuildInputs = [
     tivars
   ];
-
   doCheck = false;
 
-  meta = {
-  homepage = "https://gitea.arianb.me/arian/tibasic-script";
-  maintainers = [ ];
+  meta = with src; {
+    homepage = "https://${domain}/${owner}/${repo}";
+    maintainers = [ ];
   };
 }
