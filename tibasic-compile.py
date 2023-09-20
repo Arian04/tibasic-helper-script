@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# pylint: disable=missing-module-docstring, missing-function-docstring, unspecified-encoding
 
 import argparse
 import subprocess
