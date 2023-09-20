@@ -138,8 +138,10 @@ def upload(output_file_path):
         logger.info("Upload completed")
 
 
-if __name__ == "__main__":
+# dummy main() to call in setup.py (or in the future, pyproject.toml)
+def main():
     # Set up logging
+    global logger
     logger = logging.getLogger("tibasic_compiler")
     # FORMAT_STR = "%(name)s (%(levelname)s): %(message)s"
     FORMAT_STR = "%(levelname)s: %(message)s"
@@ -159,3 +161,7 @@ if __name__ == "__main__":
     print("---script end---")
     print(f"outfile name: {args.outfile_path}")
     print(f"program name: {args.program_name}")
+
+
+if __name__ == "__main__":
+    main()
