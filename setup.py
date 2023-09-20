@@ -8,10 +8,6 @@ setup(
     version="1.0.0",
     url="https://gitea.arianb.me/arian/tibasic-script",
     # author='Arian',
-    # author_email='lowe.thiderman@gmail.com',
-    # description=('wow very terminal doge'),
-    # license='MIT',
-    # packages=['doge'],
-    # package_data={'doge': ['static/*.txt']},
+    # license='GPL3',
     scripts=["tibasic-compile.py"],
 )

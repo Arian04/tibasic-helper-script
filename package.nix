@@ -1,14 +1,11 @@
-{ pkgs
-, buildPythonPackage
+{ lib
+, python311Packages
 , fetchPypi
 , fetchFromGitea
-,
 }:
 
-with pkgs;
-
 let
-  tivars = buildPythonPackage rec {
+  tivars = python311Packages.buildPythonPackage rec {
     pname = "tivars";
     version = "0.8.0";
     format = "wheel";
@@ -22,26 +19,23 @@ let
     };
   };
 in
-stdenv.mkDerivation {
+python311Packages.buildPythonPackage rec {
   name = "tibasic-compile";
   src = fetchFromGitea {
     domain = "gitea.arianb.me";
     owner = "arian";
     repo = "tibasic-script";
-    rev = "040a1100922a33c572fae35cc904aed51f31cb32";
-    hash = "sha256-8J52fGohPFHXkbBOX1TGNX8vrFB+cHUcGDAiPc1zCEg=";
+    rev = "5b494fa9a4b21846b8b5e1f63b0c3a414762346a";
+    hash = "sha256-MryuKuGXQe6xlKSWBhuHZyRwDGS8xjoKvHCuJh8MWYc=";
   };
-  buildInputs = [
+  propagatedBuildInputs = [
     tivars
   ];
 
-  installPhase = ''
-    install -Dm755 tibasic-compile.py $out/bin/tibasic-compile
-  '';
+  doCheck = false;
 
   meta = {
-    homepage = "https://gitea.arianb.me/arian/tibasic-script";
-    description = "TODO desc";
-    maintainers = with maintainers; [ arian ];
+  homepage = "https://gitea.arianb.me/arian/tibasic-script";
+  maintainers = [ ];
   };
 }
