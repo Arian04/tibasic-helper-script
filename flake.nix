@@ -16,7 +16,7 @@
           version = "0.8.0";
           format = "wheel";
           src = pkgs.fetchPypi {
-          inherit pname version format;
+            inherit pname version format;
             dist = "py3";
             python = "py3";
             #abi = "none";
@@ -40,7 +40,7 @@
           ];
           doCheck = false;
         };
-        
+
         apps.default = {
           type = "app";
           program = "${self.packages."${system}".default}/bin/tibasic-compile";
@@ -50,9 +50,13 @@
           name = "dev-shell";
           buildInputs = [
             #self.packages."${system}".default.inputDerivation
+            tivars
             pythonPackages.black
             nixpkgs-fmt
           ];
+          shellHook = ''
+            PATH=$PWD/src/tibasic_compile:$PATH
+          '';
         };
       });
 }
