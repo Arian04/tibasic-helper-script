@@ -1,0 +1,15 @@
+Disp "SOME PLACEHOLDER CODE"
+
+# This does some foo
+Disp "doing some foo"
+
+# You wouldnt believe what this does
+Disp "maybe even some bar" # You really wouldnt
+
+
+# Wasted lines :(
+
+Disp "goodbye world"
+# bet you didnt expect that one
+
+Stop

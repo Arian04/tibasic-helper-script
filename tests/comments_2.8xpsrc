@@ -1,0 +1,7 @@
+Disp "hello world"
+
+Disp "goodbye world # just kidding
+
+Disp "# goodbye for real this time #"
+
+Stop
