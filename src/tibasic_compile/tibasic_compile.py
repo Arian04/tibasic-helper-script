@@ -234,7 +234,7 @@ def upload(output_file_path, method) -> None:
 
     elif method == "cemu":
         proc = subprocess.run(
-            ["CEmu", "--send", output_file_path],
+            ["CEmu", "--no-reset", "--send", output_file_path],
             check=False,
             capture_output=True,
             timeout=5,
