@@ -247,6 +247,8 @@ def upload(output_file_path, method) -> None:
         args = proc.args
         return_code = proc.returncode
 
+        logger.debug("upload process stdout: %s", stdout)
+
         # Handle errors
         if stderr != "":
             logger.critical("Failed to upload file: %s", stderr)
