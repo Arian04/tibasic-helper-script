@@ -59,6 +59,16 @@ def parse_args():
             help="Skip pre-processing of file that strips out comments",
         )
 
+    def add_upload_method_arg(parser):
+        parser.add_argument(
+            "-m",
+            "--upload-method",
+            required=True,  # I know an option (-f, --foo) shouldn't be required but it looks ugly otherwise
+            dest="upload_method",
+            choices=["tilp", "cemu"],
+            help="Method used to upload the program",
+        )
+
     parser_build = subparsers.add_parser("build", help="create 8xp file from given source code")
     add_infile_arg(parser_build)
     add_outfile_arg(parser_build)
@@ -67,12 +77,14 @@ def parse_args():
 
     parser_upload = subparsers.add_parser("upload", help="upload 8xp file to calculator")
     add_outfile_arg(parser_upload)
+    add_upload_method_arg(parser_upload)
 
     # same args as build
     parser_install = subparsers.add_parser("install", help="builds and uploads the program")
     add_infile_arg(parser_install)
     add_outfile_arg(parser_install)
     add_program_name_arg(parser_install)
+    add_upload_method_arg(parser_install)
     add_processing_bool_arg(parser_install)
 
     args = parser.parse_args()
@@ -185,41 +197,68 @@ def build(input_file_contents, output_file_path, program_name) -> None:
 
 
 # Use `tilp` to upload program to calculator
-def upload(output_file_path) -> None:
+def upload(output_file_path, method) -> None:
     logger.info("Uploading %s", output_file_path)
 
-    model = "ti84+ce"
-    cable_type = "directlink"
-    proc = subprocess.run(
-        ["tilp", "--no-gui", "--silent", model, cable_type, output_file_path],
-        check=False,
-        capture_output=True,
-        timeout=5,
-        encoding="utf-8",
-    )
+    args = None
+    return_code = None
+    if method == "tilp":
+        model = "ti84+ce"
+        cable_type = "directlink"
+        proc = subprocess.run(
+            ["tilp", "--no-gui", "--silent", model, cable_type, output_file_path],
+            check=False,
+            capture_output=True,
+            timeout=5,
+            encoding="utf-8",
+        )
+        stdout = proc.stdout
+        stderr = proc.stderr
+        args = proc.args
+        return_code = proc.returncode
 
-    tilp_stdout = proc.stdout
-    tilp_stderr = proc.stderr
+        # Clean up stderr because it's in an annoying format
+        if stderr != "":
+            stderr = re.sub(
+                r"\n+", "\n", stderr  # Turn >1 consecutive newlines into 1
+            ).rstrip()  # then strip trailing
 
-    # Clean up stderr because it's in an annoying format
-    if tilp_stderr != "":
-        tilp_stderr = re.sub(
-            r"\n+", "\n", tilp_stderr  # Turn >1 consecutive newlines into 1
-        ).rstrip()  # then strip trailing
+        # Handle errors
+        if stderr != "":
+            logger.critical("Failed to upload file: %s", stderr)
+            sys.exit(1)
+        elif "placeholder that will never match" in stdout:
+            # TODO: figure out what error messages can be present and check if stdout contains them
+            logger.critical("Failed to upload file: %s", "I have no clue what happened tbh")
+            sys.exit(1)
 
-    # Handle errors
-    if tilp_stderr != "":
-        logger.critical("Failed to upload file: %s", tilp_stderr)
+    elif method == "cemu":
+        proc = subprocess.run(
+            ["CEmu", "--send", output_file_path],
+            check=False,
+            capture_output=True,
+            timeout=5,
+            encoding="utf-8",
+        )
+        stdout = proc.stdout
+        stderr = proc.stderr
+        args = proc.args
+        return_code = proc.returncode
+
+        # Handle errors
+        if stderr != "":
+            logger.critical("Failed to upload file: %s", stderr)
+            sys.exit(1)
+
+    if return_code != 0:
+        if args is None:
+            logger.critical("Failed to access process arguments")
+            logger.critical("'%s' exited with exit status %s", method, return_code)
+        else:
+            logger.critical("'%s' exited with exit status %s", " ".join(args), return_code)
         sys.exit(1)
-    elif "placeholder that will never match" in tilp_stdout:
-        # TODO: figure out what error messages can be present and check if stdout contains them
-        logger.critical("Failed to upload file: %s", "I have no clue what happened tbh")
-        sys.exit(1)
-    elif proc.returncode != 0:
-        logger.critical("'%s' exited with exit status %s", " ".join(proc.args), proc.returncode)
-        sys.exit(1)
-    else:
-        logger.info("Upload completed")
+
+    logger.info("Upload completed")
 
 
 # dummy main() to call in setup.py (or in the future, pyproject.toml)
@@ -250,29 +289,32 @@ def main():
             logger.error("how did you even do this??")
             sys.exit(5)
 
-    if args.should_process:
-        input_file_contents = preprocess(args.infile_contents)
-    else:
-        input_file_contents = args.infile_contents
-
+    input_file_contents = None
     if should_build:
+        if args.should_process:
+            input_file_contents = preprocess(args.infile_contents)
+        else:
+            input_file_contents = args.infile_contents
+
         build(input_file_contents, args.outfile_path, args.program_name)
     if should_upload:
-        upload(args.outfile_path)
+        upload(args.outfile_path, args.upload_method)
 
     logger.info("Done!")
 
     # DEBUGGING
-    logger.debug("---original script---")
-    logger.debug(args.infile_contents)
-    logger.debug("---------")
+    if should_build:
+        logger.debug("---original script---")
+        logger.debug(args.infile_contents)
+        logger.debug("---------")
 
-    logger.debug("---processed script---")
-    logger.debug(input_file_contents)
-    logger.debug("---------")
+        logger.debug("---processed script---")
+        logger.debug(input_file_contents)
+        logger.debug("---------")
+
+        logger.debug(f"program name: {args.program_name}")
 
     logger.debug(f"outfile name: {args.outfile_path}")
-    logger.debug(f"program name: {args.program_name}")
 
 
 if __name__ == "__main__":
