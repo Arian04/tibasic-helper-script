@@ -32,8 +32,8 @@
             domain = "gitea.arianb.me";
             owner = "arian";
             repo = "tibasic-script";
-            rev = "26695082a7556651af12a7f5bf77f4e757c4ad86";
-            hash = "sha256-NUX8YqCP61X8y4lNki33coNorgwLO5YPstkoG6BazzE=";
+            rev = "0c3d235b08103675d99dba29c2399cea36fd0198";
+            hash = "sha256-qbYu23FAdYiTkj30SuQd1uL2LpajUXqKv4QfqRfyOmA=";
           };
           propagatedBuildInputs = [
             tivars
