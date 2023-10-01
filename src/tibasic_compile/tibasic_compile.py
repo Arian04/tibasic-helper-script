@@ -307,12 +307,13 @@ def main():
     # DEBUGGING
     if should_build:
         logger.debug("---original script---")
-        logger.debug(args.infile_contents)
+        logger.debug("\n" + args.infile_contents)
         logger.debug("---------")
 
-        logger.debug("---processed script---")
-        logger.debug(input_file_contents)
-        logger.debug("---------")
+        if input_file_contents is not None:
+            logger.debug("---processed script---")
+            logger.debug("\n" + input_file_contents)
+            logger.debug("---------")
 
         logger.debug(f"program name: {args.program_name}")
 
