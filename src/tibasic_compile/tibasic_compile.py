@@ -135,6 +135,7 @@ def ti_program_name(string: str):
 # TODO: delete line if it's just whitespace (0 or more spaces, + newline)
 # preprocesses our input
 # - strips out comments
+# - strips out any leading whitespace
 # - (TODO) reports potential syntax errors
 def preprocess(input_file_contents) -> str:
     logger.info("Pre-processing source code")
@@ -165,17 +166,18 @@ def preprocess(input_file_contents) -> str:
                 # Keep skipping comment text until we hit end of the line
                 while processed[i] != "\n":
                     del processed[i]
-                i -= 1  # Go back to the char before newline, so the loop doesn't skip it
+                i -= 1  # Go back to the char before newline, so the next iteration doesn't skip it
 
     # Multiline string containing source code (with comments stripped out)
     processed = "".join(processed)
 
+    # Strip leading whitespace on each line + remove line if it's only whitespace
     # It would be better for performance to do this in the above loop but idrc tbh
     temp = ""
     for line in processed.splitlines():
         if not line or line.isspace():
             continue  # Don't add line if it's empty or just whitespace
-        temp += line + "\n"
+        temp += line.lstrip() + "\n"  # append l-strip'd line
     processed = temp
 
     # Strip trailing newline
