@@ -202,6 +202,8 @@ def build(input_file_contents, output_file_path, program_name) -> None:
 def upload(output_file_path, method) -> None:
     logger.info("Uploading %s", output_file_path)
 
+    stdout = None
+    stderr = None
     args = None
     return_code = None
     if method == "tilp":
@@ -221,18 +223,24 @@ def upload(output_file_path, method) -> None:
 
         # Clean up stderr because it's in an annoying format
         if stderr != "":
+            # Trim some empty space
             stderr = re.sub(
                 r"\n+", "\n", stderr  # Turn >1 consecutive newlines into 1
-            ).rstrip()  # then strip trailing
+            ).strip()  # then strip leading and trailing whitespace
 
-        # Handle errors
-        if stderr != "":
-            logger.critical("Failed to upload file: %s", stderr)
-            sys.exit(1)
-        elif "placeholder that will never match" in stdout:
-            # TODO: figure out what error messages can be present and check if stdout contains them
-            logger.critical("Failed to upload file: %s", "I have no clue what happened tbh")
-            sys.exit(1)
+            # Logs look like, for example: (tilp:244637): ticables-WARNING **: 02:40:00.344:  no devices found!
+            # TODO: try to trim out that extra garbage before the actual error
+
+            # Remove consecutive duplicate lines (because it prints errors multiple times for some reason)
+            temp = ""
+            previous_line = None
+            for current_line in stderr.splitlines():
+                if current_line != previous_line:
+                    temp += current_line + "\n"
+
+                previous_line = current_line
+            temp = temp[:-1]  # trim extra newline added on final iteration
+            stderr = temp
 
     elif method == "cemu":
         proc = subprocess.run(
@@ -247,14 +255,13 @@ def upload(output_file_path, method) -> None:
         args = proc.args
         return_code = proc.returncode
 
-        logger.debug("upload process stdout: %s", stdout)
+    logger.debug("upload process stdout: %s", stdout)
 
-        # Handle errors
-        if stderr != "":
-            logger.critical("Failed to upload file: %s", stderr)
-            sys.exit(1)
-
-    if return_code != 0:
+    # Handle errors
+    if stderr != "":
+        logger.critical("Failed to upload file: %s", stderr)
+        sys.exit(1)
+    elif return_code != 0:
         if args is None:
             logger.critical("Failed to access process arguments")
             logger.critical("'%s' exited with exit status %s", method, return_code)
