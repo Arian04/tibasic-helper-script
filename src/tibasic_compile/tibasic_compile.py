@@ -272,7 +272,6 @@ def upload(output_file_path, method) -> None:
     logger.info("Upload completed")
 
 
-# dummy main() to call in setup.py (or in the future, pyproject.toml)
 def main():
     # Set up logging
     global logger
