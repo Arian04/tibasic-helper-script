@@ -1,5 +1,5 @@
 {
-  description = "TODO description";
+  description = "tibasic helper script thingy";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -11,6 +11,9 @@
         pkgs = inputs.nixpkgs.legacyPackages."${system}";
         pythonPackages = pkgs.python311Packages;
 
+        # Having to maintain the version and hash in nix code instead of the lockfile doesn't seem
+        # to be in line with nix flakes best practices but I need to figure out how I wanna move it
+        # to the lockfile
         tivars = pythonPackages.buildPythonPackage rec {
           pname = "tivars";
           version = "0.8.0";
@@ -28,13 +31,7 @@
       {
         packages.default = pythonPackages.buildPythonPackage {
           name = "tibasic-compile";
-          src = pkgs.fetchFromGitea {
-            domain = "gitea.arianb.me";
-            owner = "arian";
-            repo = "tibasic-script";
-            rev = "efb87ae460761c43c2e91deb3b2c78e472e00354";
-            hash = "sha256-LV2oApkFNDXgkFc/IY4XHVKV/o5MQE6G/XM6nYKANYg=";
-          };
+          src = ./.;
           propagatedBuildInputs = [
             tivars
           ];
